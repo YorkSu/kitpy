@@ -30,9 +30,9 @@ CONFIG_PATH = ''
 DATA_PATH = ''
 
 get_logger = log.get_logger
-now = time.now
-sleep = time.sleep
-strftime = time.strftime
+now = times.now
+sleep = times.sleep
+strftime = times.strftime
 lazy_load = lazy.load
 
 
