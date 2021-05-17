@@ -4,6 +4,28 @@ import time
 import logging
 import logging.handlers
 
+DEFAULT_CFG = {
+    'enable': True,
+    'level': 'info',
+    'fmt': '%(asctime)s.%(msecs)03d [%(levelname)s] >%(name)s: %(message)s',
+    'datefmt': '%Y-%m-%d %H:%M:%S',
+    'file': {
+        'enable': True,
+        'level': 'info',
+        'basename': 'logging',
+        'path': 'logs',
+        'suffix': '.log',
+        'when': 'D',
+        'month': True,
+        'error_enable': True,
+        'error_suffix': '.error',
+    },
+    'console': {
+        'enable': 'true',
+        'level': 'info',
+    },
+}
+
 
 class TimedRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
     """
@@ -16,6 +38,7 @@ class TimedRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
     Based on Timed Rotating FileHandler modifications, month-based
     archiving has been added
     """
+
     def __init__(self,
                  filename,
                  mode='a+',
@@ -103,16 +126,28 @@ class Log:
         'ERROR': logging.ERROR,
         'FATAL': logging.FATAL,
     }
-    INITED = False
-    BASE = False
+    NOT_INIT = 0
+    INITED = 1
+    BASE = 2
+    STATUS = NOT_INIT
 
     @staticmethod
-    def get_logger(name) -> logging.Logger:
+    def get_logger(name: str) -> logging.Logger:
         return logging.getLogger(name)
 
     @staticmethod
-    def get_level(level: str, default=logging.INFO) -> int:
-        return Log.LEVEL.get(level.upper(), default)
+    def get_level(level, default=logging.INFO) -> int:
+        if isinstance(level, str):
+            return Log.LEVEL.get(level.upper(), default)
+        if isinstance(level, int):
+            return level
+        return default
+
+    @staticmethod
+    def clear() -> bool:
+        Log.clear_handlers()
+        Log.STATUS = Log.NOT_INIT
+        return True
 
     @staticmethod
     def clear_handlers() -> bool:
@@ -122,37 +157,29 @@ class Log:
 
     @staticmethod
     def init(cfg: dict = None, root: str = './') -> bool:
-        if Log.INITED and not Log.BASE:
+        if Log.STATUS == Log.INITED:
             return True
 
-        if cfg is None:
-            cfg = {}
-
+        cfg = (cfg, {})[cfg is None]
         if not isinstance(cfg, dict):
             return False
+        cfg = cfg.get('logging', cfg)
 
-        cfg = cfg.get('logging', {})
-
-        enable = cfg.get('enable', False)
-
+        enable = bool(cfg.get('enable', False))
         if not enable:
-            Log.INITED = True
-            Log.BASE = True
+            Log.STATUS = Log.BASE
             Log.clear_handlers()
             logging.basicConfig(level=logging.DEBUG)
             logging.info('using base logger')
             return True
 
-        file_enable = cfg['file']['enable']
+        console_enable = bool(cfg['console']['enable'])
+        file_enable = bool(cfg['file']['enable'])
+        logger_level = Log.get_level(cfg['level'])
         fmt = cfg['fmt']
         datefmt = cfg['datefmt']
 
-        logger_level = Log.get_level(cfg['level']['logger'])
-        file_level = Log.get_level(cfg['level']['file'])
-        console_level = Log.get_level(cfg['level']['console'])
-
-        Log.clear_handlers()
-        Log.BASE = False
+        Log.clear()
         logger = logging.getLogger()
         logger.setLevel(logger_level)
         formatter = logging.Formatter(
@@ -161,13 +188,16 @@ class Log:
         )
 
         # console handler
-        console = logging.StreamHandler()
-        console.setLevel(console_level)
-        console.setFormatter(formatter)
-        logger.addHandler(console)
+        if console_enable:
+            console_level = Log.get_level(cfg['console']['level'])
+            console = logging.StreamHandler()
+            console.setLevel(console_level)
+            console.setFormatter(formatter)
+            logger.addHandler(console)
 
         # file handler
         if file_enable:
+            file_level = Log.get_level(cfg['file']['level'])
             basename = cfg['file']['basename']
             path = cfg['file']['path']
             suffix = cfg['file']['suffix']
@@ -224,5 +254,12 @@ class Log:
                 handler.setFormatter(formatter)
                 logger.addHandler(handler)
 
-        Log.INITED = True
+        Log.STATUS = Log.INITED
         return True
+
+
+get_logger = Log.get_logger
+get_level = Log.get_level
+clear = Log.clear
+clear_handlers = Log.clear_handlers
+init = Log.init

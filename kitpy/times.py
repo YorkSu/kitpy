@@ -3,6 +3,35 @@ import time
 import logging
 
 
+class Count:
+    def __init__(self,
+                 message='Codes Cost Seconds: {cost}',
+                 prec=6,
+                 logger=True,
+                 show=True):
+        self.message = message
+        self.prec = prec
+        self.logger = logger
+        self.show = show
+        self.start = 0.
+        self.stop = 0.
+        self.cost = 0.
+
+    def __enter__(self):
+        self.start = time.perf_counter()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.stop = time.perf_counter()
+        self.cost = round(self.stop - self.start, self.prec)
+        if self.show:
+            if self.logger:
+                log = logging.getLogger(__name__)
+                log.info(self.message.replace('{cost}', str(self.cost)))
+            else:
+                print(self.message.replace('{cost}', str(self.cost)))
+
+
 class Time:
     DATE = "%Y-%m-%d"
     TIME = "%Y-%m-%d %H-%M-%S"
@@ -35,30 +64,12 @@ class Time:
         time.sleep(second)
 
 
-class Count:
-    def __init__(self,
-                 message='Codes Cost Seconds: {cost}',
-                 prec=6,
-                 logger=True,
-                 show=True):
-        self.message = message
-        self.prec = prec
-        self.logger = logger
-        self.show = show
-        self.start = 0.
-        self.stop = 0.
-        self.cost = 0.
+DATE = Time.DATE
+TIME = Time.TIME
+DEFAULT = Time.DEFAULT
 
-    def __enter__(self):
-        self.start = time.perf_counter()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.stop = time.perf_counter()
-        self.cost = round(self.stop - self.start, self.prec)
-        if self.show:
-            if self.logger:
-                log = logging.getLogger(__name__)
-                log.info(self.message.replace('{cost}', str(self.cost)))
-            else:
-                print(self.message.replace('{cost}', str(self.cost)))
+now = Time.now
+unix = Time.unix
+strftime = Time.strftime
+localtime = Time.localtime
+sleep = Time.sleep

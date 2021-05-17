@@ -9,7 +9,8 @@ from kitpy import paths
 from kitpy import times
 
 from kitpy.abcs import Singleton
-from kitpy.config import ConfigHandler
+from kitpy.abcs import AbstractSingleton
+from kitpy.config import ConfigLoader
 from kitpy.flags import FLAGS
 from kitpy.lazy import LazyLoader
 from kitpy.log import Log
@@ -19,27 +20,27 @@ from kitpy.times import Count
 
 __author__ = """York Su"""
 __email__ = 'york_su@qq.com'
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 
-INIT_UTILS = False
+INITED = False
 HERE = paths.fd(__file__)
 ROOT = ''
 CONFIG_PATH = ''
 DATA_PATH = ''
 
-get_logger = Log.get_logger
-now = Time.now
-sleep = Time.sleep
-strftime = Time.strftime
-lazy_import = LazyLoader.load
+get_logger = log.get_logger
+now = time.now
+sleep = time.sleep
+strftime = time.strftime
+lazy_load = lazy.load
 
 
 def init(project_path=None,
          config_path='config',
          config_file='config.yml',
          data_path='data') -> bool:
-    global INIT_UTILS, ROOT, CONFIG_PATH, DATA_PATH
+    global INITED, ROOT, CONFIG_PATH, DATA_PATH
     if project_path is not None:
         ROOT = paths.abs(project_path)
     elif ROOT == '':
@@ -49,14 +50,14 @@ def init(project_path=None,
     FLAGS.ROOT = ROOT
     FLAGS.CONFIG_PATH = CONFIG_PATH
     FLAGS.DATA_PATH = DATA_PATH
-    FLAGS.CFG = ConfigHandler.load(config_file, CONFIG_PATH)
+    FLAGS.CFG = ConfigLoader.load(config_file, CONFIG_PATH)
     Log.init(cfg=FLAGS.CFG, root=ROOT)
-    INIT_UTILS = True
+    INITED = True
     return True
 
 
 def is_inited() -> bool:
-    return INIT_UTILS
+    return INITED
 
 
 def set_here(here: str=None, from_file=None) -> bool:

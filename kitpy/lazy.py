@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import importlib
-import typing
 import logging
+from typing import Optional
 from types import ModuleType
 
 from kitpy.abcs import Singleton
@@ -12,12 +12,12 @@ class LazyLoader(Singleton):
     LOG = logging.getLogger(__name__)
 
     @staticmethod
-    def load(name: str) -> typing.Optional['ModuleType']:
+    def load(name: str) -> Optional['ModuleType']:
         LazyLoader.LOG.debug(f'load {name}')
         if name not in LazyLoader.MODULES:
             with LazyLoader._lock:
                 if name not in LazyLoader.MODULES:
-                    module: typing.Optional['ModuleType'] = None
+                    module: Optional['ModuleType'] = None
                     e = ''
                     try:
                         module = importlib.import_module(name)
@@ -28,3 +28,6 @@ class LazyLoader(Singleton):
                         'e': e
                     }
         return LazyLoader.MODULES.get(name)['module']
+
+
+load = LazyLoader.load

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
-import abc
 import json
 import typing
 
 from ruamel.yaml import YAML
 
 from kitpy import paths
+from kitpy.abcs import AbstractSingleton, abstractmethod
 
 
-class BaseHandler(abc.ABC):
+class BaseLoader(AbstractSingleton):
     @staticmethod
-    @abc.abstractmethod
+    @abstractmethod
     def load(filename: str, root='./') -> dict: ...
 
     @staticmethod
-    @abc.abstractmethod
+    @abstractmethod
     def dump(obj: dict, filename: str, root='./') -> bool: ...
 
 
-class YamlHandler(BaseHandler):
+class YamlLoader(BaseLoader):
     @staticmethod
     def load(filename: str, root='./') -> dict:
         cfg = dict()
@@ -46,7 +46,7 @@ class YamlHandler(BaseHandler):
         return True
 
 
-class JsonHandler(BaseHandler):
+class JsonLoader(BaseLoader):
     @staticmethod
     def load(filename: str, root='./') -> dict:
         cfg = dict()
@@ -77,24 +77,28 @@ class JsonHandler(BaseHandler):
         return True
 
 
-class ConfigHandler(BaseHandler):
+class ConfigLoader(BaseLoader):
     @staticmethod
     def load(filename: str, root='./') -> dict:
         cfg = dict()
-        handler: typing.Optional['BaseHandler'] = None
+        handler: typing.Optional['BaseLoader'] = None
         if filename.endswith('.yml') or filename.endswith('.yaml'):
-            handler = YamlHandler
+            handler = YamlLoader
         elif filename.endswith('.json'):
-            handler = JsonHandler
+            handler = JsonLoader
         if handler:
             cfg = handler.load(filename, root)
         return cfg
 
     @staticmethod
     def dump(obj: dict, filename: str, root='./', **kwargs) -> bool:
-        handler: typing.Optional['BaseHandler'] = None
+        handler: typing.Optional['BaseLoader'] = None
         if filename.endswith('.yml') or filename.endswith('.yaml'):
-            handler = YamlHandler
+            handler = YamlLoader
         elif filename.endswith('.json'):
-            handler = JsonHandler
+            handler = JsonLoader
         return handler.dump(obj, filename, root, **kwargs) if handler else False
+
+
+load = ConfigLoader.load
+dump = ConfigLoader.dump

@@ -5,12 +5,15 @@ import sys
 
 abs = os.path.abspath
 basename = os.path.basename
+commonpath = os.path.commonpath
+commonprefix = os.path.commonprefix
 curdir = os.path.curdir
 cwd = os.getcwd
 dir = os.path.dirname
 dirname = os.path.dirname
 exists = os.path.exists
-join = os.path.join
+expanduser = os.path.expanduser
+expandvars = os.path.expandvars
 getatime = os.path.getatime
 getctime = os.path.getctime
 getmtime = os.path.getmtime
@@ -19,9 +22,14 @@ isabs = os.path.isabs
 isdir = os.path.isdir
 isfile = os.path.isfile
 islink = os.path.islink
+ismount = os.path.ismount
+join = os.path.join
 listdir = os.listdir
+normcase = os.path.normcase
+normpath = os.path.normpath
 remove = os.remove
 realpath = os.path.realpath
+relpath = os.path.relpath
 split = os.path.split
 
 
