@@ -30,6 +30,7 @@ CONFIG_PATH = ''
 DATA_PATH = ''
 
 get_logger = log.get_logger
+getLogger = log.get_logger
 now = times.now
 sleep = times.sleep
 strftime = times.strftime
