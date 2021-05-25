@@ -167,96 +167,10 @@ class Log:
 
         enable = bool(cfg.get('enable', False))
         if not enable:
-            # Log.STATUS = Log.BASE
-            # Log.clear_handlers()
-            # logging.basicConfig(level=logging.DEBUG)
-            # logging.info('using base logger')
             Log.init_default()
             return True
 
         Log.init_body(cfg, root)
-        # console_enable = bool(cfg['console']['enable'])
-        # file_enable = bool(cfg['file']['enable'])
-        # logger_level = Log.get_level(cfg['level'])
-        # fmt = cfg['fmt']
-        # datefmt = cfg['datefmt']
-        #
-        # Log.clear()
-        # logger = logging.getLogger()
-        # logger.setLevel(logger_level)
-        # formatter = logging.Formatter(
-        #     fmt=fmt,
-        #     datefmt=datefmt,
-        # )
-        #
-        # # console handler
-        # if console_enable:
-        #     console_level = Log.get_level(cfg['console']['level'])
-        #     console = logging.StreamHandler()
-        #     console.setLevel(console_level)
-        #     console.setFormatter(formatter)
-        #     logger.addHandler(console)
-        #
-        # # file handler
-        # if file_enable:
-        #     file_level = Log.get_level(cfg['file']['level'])
-        #     basename = cfg['file']['basename']
-        #     path = cfg['file']['path']
-        #     suffix = cfg['file']['suffix']
-        #     when = cfg['file']['when']
-        #     month = bool(cfg['file']['month'])
-        #     error_enable = cfg['file']['error_enable']
-        #     error_suffix = cfg['file']['error_suffix']
-        #
-        #     if not os.path.isabs(path):
-        #         path = os.path.join(root, path)
-        #     if not os.path.exists(path):
-        #         os.mkdir(path)
-        #     basename = os.path.join(
-        #         path,
-        #         basename
-        #     )
-        #
-        #     if error_enable:
-        #         rsp_handler = TimedRotatingFileHandler(
-        #             basename,
-        #             mode='a+',
-        #             when=when,
-        #             encoding='utf-8',
-        #             month_archiving=month,
-        #         )
-        #         rsp_handler.suffix += suffix
-        #         rsp_handler.addFilter(LevelFilter(True))
-        #         rsp_handler.setLevel(file_level)
-        #         rsp_handler.setFormatter(formatter)
-        #         logger.addHandler(rsp_handler)
-        #
-        #         err_handler = TimedRotatingFileHandler(
-        #             basename + error_suffix,
-        #             mode='a+',
-        #             when=when,
-        #             encoding='utf-8',
-        #             month_archiving=month,
-        #         )
-        #         err_handler.suffix += suffix
-        #         err_handler.addFilter(LevelFilter(False))
-        #         err_handler.setLevel(file_level)
-        #         err_handler.setFormatter(formatter)
-        #         logger.addHandler(err_handler)
-        #     else:
-        #         handler = TimedRotatingFileHandler(
-        #             basename,
-        #             mode='a+',
-        #             when=when,
-        #             encoding='utf-8',
-        #             month_archiving=month,
-        #         )
-        #         handler.suffix += suffix
-        #         handler.setLevel(file_level)
-        #         handler.setFormatter(formatter)
-        #         logger.addHandler(handler)
-        #
-        # Log.STATUS = Log.INITED
         return True
 
     @staticmethod
