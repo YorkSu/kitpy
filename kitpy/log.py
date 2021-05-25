@@ -3,6 +3,7 @@ import os
 import time
 import logging
 import logging.handlers
+from typing import Optional
 
 DEFAULT_CFG = {
     'enable': True,
@@ -160,12 +161,11 @@ class Log:
         if Log.STATUS == Log.INITED:
             return False
 
-        cfg = (cfg, {})[cfg is None]
-        if not isinstance(cfg, dict):
+        cfg = Log.get_cfg(cfg)
+        if cfg is None:
             return False
-        cfg = cfg.get('logging', cfg)
 
-        enable = bool(cfg.get('enable', False))
+        enable = cfg.get('enable', False)
         if not enable:
             if Log.STATUS == Log.BASE:
                 return False
@@ -176,6 +176,13 @@ class Log:
         return True
 
     @staticmethod
+    def get_cfg(cfg: dict) -> Optional[dict]:
+        cfg = (cfg, {})[cfg is None]
+        if not isinstance(cfg, dict):
+            return None
+        return cfg.get('logging', cfg)
+
+    @staticmethod
     def init_default():
         Log.clear_handlers()
         logging.basicConfig(level=logging.DEBUG)
@@ -183,7 +190,7 @@ class Log:
         Log.STATUS = Log.BASE
 
     @staticmethod
-    def init_body(cfg: dict, root: str = './'):
+    def init_body(cfg: dict, root: str):
         console_enable = bool(cfg['console']['enable'])
         file_enable = bool(cfg['file']['enable'])
         logger_level = Log.get_level(cfg['level'])
