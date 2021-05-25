@@ -191,17 +191,12 @@ class Log:
 
     @staticmethod
     def init_body(cfg: dict, root: str):
-        file_enable = cfg['file']['enable']
-        logger_level = Log.get_level(cfg['level'])
-        fmt = cfg['fmt']
-        datefmt = cfg['datefmt']
-
         Log.clear()
         logger = logging.getLogger()
-        logger.setLevel(logger_level)
+        logger.setLevel(Log.get_level(cfg['level']))
         formatter = logging.Formatter(
-            fmt=fmt,
-            datefmt=datefmt,
+            fmt=cfg['fmt'],
+            datefmt=cfg['datefmt'],
         )
 
         # console handler
@@ -213,7 +208,7 @@ class Log:
             logger.addHandler(console)
 
         # file handler
-        if file_enable:
+        if cfg['file']['enable']:
             file_level = Log.get_level(cfg['file']['level'])
             basename = cfg['file']['basename']
             path = cfg['file']['path']
