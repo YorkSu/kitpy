@@ -158,7 +158,7 @@ class Log:
     @staticmethod
     def init(cfg: dict = None, root: str = './') -> bool:
         if Log.STATUS == Log.INITED:
-            return True
+            return False
 
         cfg = (cfg, {})[cfg is None]
         if not isinstance(cfg, dict):
@@ -167,6 +167,8 @@ class Log:
 
         enable = bool(cfg.get('enable', False))
         if not enable:
+            if Log.STATUS == Log.BASE:
+                return False
             Log.init_default()
             return True
 
