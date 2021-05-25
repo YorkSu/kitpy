@@ -170,9 +170,9 @@ class Log:
             if Log.STATUS == Log.BASE:
                 return False
             Log.init_default()
-            return True
+        else:
+            Log.init_body(cfg, root)
 
-        Log.init_body(cfg, root)
         return True
 
     @staticmethod
@@ -191,8 +191,7 @@ class Log:
 
     @staticmethod
     def init_body(cfg: dict, root: str):
-        console_enable = bool(cfg['console']['enable'])
-        file_enable = bool(cfg['file']['enable'])
+        file_enable = cfg['file']['enable']
         logger_level = Log.get_level(cfg['level'])
         fmt = cfg['fmt']
         datefmt = cfg['datefmt']
@@ -206,7 +205,7 @@ class Log:
         )
 
         # console handler
-        if console_enable:
+        if cfg['console']['enable']:
             console_level = Log.get_level(cfg['console']['level'])
             console = logging.StreamHandler()
             console.setLevel(console_level)
