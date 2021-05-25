@@ -52,3 +52,11 @@ class TestLog:
         logger.info('OK')
         logger.warning('warning infomation')
         logger.error('error infomation')
+
+    def test_repeat_init(self):
+        print()  # pytest new line
+        Log.clear()
+        cfg = kp.config.load('config.yml', CONFIG_PATH)
+        assert Log.init(cfg, ROOT)
+        assert Log.STATUS == Log.INITED
+        assert not Log.init(cfg, ROOT)
