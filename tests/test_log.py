@@ -60,3 +60,10 @@ class TestLog:
         assert Log.init(cfg, ROOT)
         assert Log.STATUS == Log.INITED
         assert not Log.init(cfg, ROOT)
+
+    def test_repeat_base(self):
+        print()  # pytest new line
+        Log.clear()
+        assert Log.init()
+        assert Log.STATUS == Log.BASE
+        assert not Log.init()
