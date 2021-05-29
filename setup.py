@@ -6,7 +6,6 @@ from setuptools import setup, find_packages
 
 from kitpy import __version__
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Get the long description from the README file
@@ -44,6 +43,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     license="MIT license",
 )
