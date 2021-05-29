@@ -38,7 +38,7 @@ class Count:
             print(self.message)
 
 
-class Format:
+class TimeFormat:
     SHORT = '%Y-%m-%d'
     LONG = '%Y-%m-%d %H-%M-%S'
     GENERAL_LONG = '%Y-%m-%d %H:%M:%S'
@@ -46,11 +46,11 @@ class Format:
     NUMONLY_LONG = '%Y%m%d%H%M%S'
 
 
-def now(fmt: str = Format.LONG) -> str:
+def now(fmt: str = TimeFormat.LONG) -> str:
     return strftime(fmt)
 
 
-def strftime(fmt: str = Format.LONG, struct_time=None, timestamp=None) -> str:
+def strftime(fmt: str = TimeFormat.LONG, struct_time=None, timestamp=None) -> str:
     if struct_time is None:
         if timestamp is None:
             timestamp = time.time()
