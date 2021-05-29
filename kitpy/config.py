@@ -1,104 +1,110 @@
 # -*- coding: utf-8 -*-
+import abc
+import os
 import json
-import typing
 
 from ruamel.yaml import YAML
 
-from kitpy import paths
-from kitpy.abcs import AbstractSingleton, abstractmethod
+
+class Handler(abc.ABC):
+    @abc.abstractmethod
+    def load(self) -> dict: ...
+
+    @abc.abstractmethod
+    def dump(self, obj: dict) -> None: ...
 
 
-class BaseLoader(AbstractSingleton):
-    @staticmethod
-    @abstractmethod
-    def load(filename: str, root='./') -> dict: ...
+class BaseHander(Handler):
+    def __init__(self,
+                 filename: str,
+                 encoding='utf-8',
+                 readonly=False):
+        self.filename = filename
+        self.encoding = encoding
+        self.readonly = readonly
 
-    @staticmethod
-    @abstractmethod
-    def dump(obj: dict, filename: str, root='./') -> bool: ...
+    def load(self) -> dict:
+        if not self.exists:
+            raise Exception(
+                'file not exist',
+                self.filename
+            )
+        return dict()
 
+    def dump(self, obj: dict) -> None:
+        if not isinstance(obj, dict):
+            raise TypeError(
+                "dump.obj except serializable object, got",
+                type(obj)
+            )
+        if self.readonly:
+            raise Exception('readonly')
 
-class YamlLoader(BaseLoader):
-    @staticmethod
-    def load(filename: str, root='./') -> dict:
-        cfg = dict()
-        filename = paths.fix(root, filename)
-        if paths.exists(filename):
-            try:
-                with open(filename, 'r', encoding='utf-8') as f:
-                    cfg = YAML(typ='safe').load(f)
-                if cfg is None:
-                    cfg = dict()
-            except Exception as e:
-                print(e)
-        return cfg
-
-    @staticmethod
-    def dump(obj: dict, filename: str, root='./') -> bool:
-        assert isinstance(obj, dict)
-        filename = paths.fix(root, filename)
-        try:
-            with open(filename, 'w', encoding='utf-8') as f:
-                YAML().dump(obj, f)
-        except Exception as e:
-            print(e)
-            return False
-        return True
+    @property
+    def exists(self) -> bool:
+        return os.path.exists(self.filename)
 
 
-class JsonLoader(BaseLoader):
-    @staticmethod
-    def load(filename: str, root='./') -> dict:
-        cfg = dict()
-        filename = paths.fix(root, filename)
-        if paths.exists(filename):
-            try:
-                with open(filename, 'r', encoding='utf-8') as f:
-                    cfg = json.load(f)
-            except Exception as e:
-                print(e)
-        return cfg
+class JsonHandler(BaseHander):
+    def load(self) -> dict:
+        super().load()
+        with open(self.filename, 'r', encoding=self.encoding) as f:
+            result = json.load(f)
+        return result
 
-    @staticmethod
-    def dump(obj: dict, filename: str, root='./', indent=2, ensure_ascii=False) -> bool:
-        assert isinstance(obj, dict)
-        filename = paths.fix(root, filename)
-        try:
-            with open(filename, 'w', encoding='utf-8') as f:
-                json.dump(
-                    obj,
-                    f,
-                    indent=indent,
-                    ensure_ascii=ensure_ascii
-                )
-        except Exception as e:
-            print(e)
-            return False
-        return True
+    def dump(self, obj: dict, indent=2, ensure_ascii=False) -> None:
+        super().dump(obj)
+        with open(self.filename, 'w', encoding=self.encoding) as f:
+            json.dump(
+                obj,
+                f,
+                indent=indent,
+                ensure_ascii=ensure_ascii
+            )
 
 
-class ConfigLoader(BaseLoader):
-    @staticmethod
-    def load(filename: str, root='./') -> dict:
-        cfg = dict()
-        handler: typing.Optional['BaseLoader'] = None
-        if filename.endswith('.yml') or filename.endswith('.yaml'):
-            handler = YamlLoader
-        elif filename.endswith('.json'):
-            handler = JsonLoader
-        if handler:
-            cfg = handler.load(filename, root)
-        return cfg
+class YamlHandler(BaseHander):
+    def load(self) -> dict:
+        super().load()
+        with open(self.filename, 'r', encoding='utf-8') as f:
+            result = YAML(typ='safe').load(f)
+        if result is None:
+            result = dict()
+        return result
 
-    @staticmethod
-    def dump(obj: dict, filename: str, root='./', **kwargs) -> bool:
-        handler: typing.Optional['BaseLoader'] = None
-        if filename.endswith('.yml') or filename.endswith('.yaml'):
-            handler = YamlLoader
-        elif filename.endswith('.json'):
-            handler = JsonLoader
-        return handler.dump(obj, filename, root, **kwargs) if handler else False
+    def dump(self, obj: dict) -> None:
+        super().dump(obj)
+        with open(self.filename, 'w', encoding='utf-8') as f:
+            YAML().dump(obj, f)
 
 
-load = ConfigLoader.load
-dump = ConfigLoader.dump
+class ConfigHandler(BaseHander):
+    def __init__(self,
+                 filename: str,
+                 encoding='utf-8',
+                 readonly=False):
+        super().__init__(filename, encoding, readonly)
+        self._handler = self.create_handler()(filename, encoding, readonly)
+
+    def create_handler(self) -> 'Handler':
+        if self.filename.endswith('.yml'):
+            return YamlHandler
+        if self.filename.endswith('.yaml'):
+            return YamlHandler
+        if self.filename.endswith('.json'):
+            return JsonHandler
+        return BaseHander
+
+    def load(self) -> dict:
+        return self._handler.load()
+
+    def dump(self, obj: dict, *args, **kwargs) -> None:
+        self._handler.dump(obj, *args, **kwargs)
+
+
+def load(filename: str) -> dict:
+    return ConfigHandler(filename).load()
+
+
+def dump(filename: str, obj: dict, *args, **kwargs) -> None:
+    return ConfigHandler(filename).dump(obj, *args, **kwargs)

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-import os
-import time
 import logging
 import logging.handlers
-from typing import Optional
+import os
+import time
+
+from kitpy.singleton import Singleton
+from kitpy.convert import AdvancedDict
+from kitpy.convert import dict2ad
 
 DEFAULT_CFG = {
     'enable': True,
@@ -13,8 +16,9 @@ DEFAULT_CFG = {
     'file': {
         'enable': True,
         'level': 'info',
-        'basename': 'logging',
+        'root': './',
         'path': 'logs',
+        'basename': 'logging',
         'suffix': '.log',
         'when': 'D',
         'month': True,
@@ -42,7 +46,6 @@ class TimedRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
 
     def __init__(self,
                  filename,
-                 mode='a+',
                  when='h',
                  interval=1,
                  backupCount=0,
@@ -119,7 +122,7 @@ class LevelFilter(logging.Filter):
         return self.less == (record.levelno < self.level)
 
 
-class Log:
+class Log(Singleton):
     LEVEL = {
         'DEBUG': logging.DEBUG,
         'INFO': logging.INFO,
@@ -130,149 +133,121 @@ class Log:
     NOT_INIT = 0
     INITED = 1
     BASE = 2
-    STATUS = NOT_INIT
+
+    def __init__(self, cfg: dict):
+        self.cfg: AdvancedDict = None
+        self.status = self.NOT_INIT
+
+        self.set_cfg(cfg)
+
+        self.root_logger: logging.Logger = self.get_logger()
+        self.formatter: logging.Formatter = None
+
+    @classmethod
+    def is_status(cls, status: int) -> bool:
+        return cls().status == status
+
+    def set_status(self, status: int) -> None:
+        self.status = status
+
+    def clear(self) -> None:
+        self.clear_handlers()
+        self.status = self.NOT_INIT
+
+    def set_cfg(self, cfg: dict) -> None:
+        if not isinstance(cfg, dict):
+            cfg = {}
+        self.cfg = dict2ad(cfg.get('logging', cfg))
 
     @staticmethod
-    def get_logger(name: str) -> logging.Logger:
-        return logging.getLogger(name)
+    def clear_handlers() -> None:
+        logging.getLogger().handlers.clear()
 
-    @staticmethod
-    def get_level(level, default=logging.INFO) -> int:
+    @classmethod
+    def get_level(cls, level, default=logging.INFO) -> int:
         if isinstance(level, str):
-            return Log.LEVEL.get(level.upper(), default)
+            return cls.LEVEL.get(level.upper(), default)
         if isinstance(level, int):
             return level
         return default
 
     @staticmethod
-    def clear() -> bool:
-        Log.clear_handlers()
-        Log.STATUS = Log.NOT_INIT
-        return True
+    def get_logger(name: str = None) -> logging.Logger:
+        return logging.getLogger(name)
 
-    @staticmethod
-    def clear_handlers() -> bool:
-        logger = logging.getLogger()
-        logger.handlers.clear()
-        return True
+    getLogger = get_logger
 
-    @staticmethod
-    def init(cfg: dict = None, root: str = './') -> bool:
-        if Log.STATUS == Log.INITED:
+    def init(self) -> bool:
+        if self.is_status(self.INITED):
             return False
-
-        cfg = Log.get_cfg(cfg)
-        if cfg is None:
-            return False
-
-        enable = cfg.get('enable', False)
-        if not enable:
-            if Log.STATUS == Log.BASE:
-                return False
-            Log.init_default()
+        if self.cfg.enable:
+            self._init_logger()
+        elif not self.is_status(self.BASE):
+            self._init_base_logger()
         else:
-            Log.init_body(cfg, root)
-
+            return False
         return True
 
-    @staticmethod
-    def get_cfg(cfg: dict) -> Optional[dict]:
-        cfg = (cfg, {})[cfg is None]
-        if not isinstance(cfg, dict):
-            return None
-        return cfg.get('logging', cfg)
-
-    @staticmethod
-    def init_default():
-        Log.clear_handlers()
+    def _init_base_logger(self) -> None:
+        self.clear()
         logging.basicConfig(level=logging.DEBUG)
         logging.info('using base logger')
-        Log.STATUS = Log.BASE
+        self.set_status(self.BASE)
 
-    @staticmethod
-    def init_body(cfg: dict, root: str):
-        Log.clear()
-        logger = logging.getLogger()
-        logger.setLevel(Log.get_level(cfg['level']))
-        formatter = logging.Formatter(
-            fmt=cfg['fmt'],
-            datefmt=cfg['datefmt'],
+    def _init_logger(self) -> None:
+        self.clear()
+        self.root_logger.setLevel(self.get_level(self.cfg.level))
+        self.formatter = logging.Formatter(fmt=self.cfg.fmt,
+                                           datefmt=self.cfg.datefmt)
+        self._set_console_handler()
+        self._set_file_handler()
+        self.set_status(self.INITED)
+
+    def _set_console_handler(self) -> None:
+        if self.cfg.console is None or not self.cfg.console.enable:
+            return
+
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(self.get_level(self.cfg.console.level))
+        console_handler.setFormatter(self.formatter)
+        self.root_logger.addHandler(console_handler)
+
+    def _set_file_handler(self) -> None:
+        if self.cfg.file is None or not self.cfg.file.enable:
+            return
+
+        basename = self._get_basename()
+
+        if self.cfg.file.error_enable:
+            rsp_handler = self._get_timed_handler(basename)
+            rsp_handler.addFilter(LevelFilter(True))
+            self.root_logger.addHandler(rsp_handler)
+            err_handler = self._get_timed_handler(basename
+                                                  + self.cfg.file.error_suffix)
+            err_handler.addFilter(LevelFilter(False))
+            self.root_logger.addHandler(err_handler)
+        else:
+            handler = self._get_timed_handler(basename)
+            self.root_logger.addHandler(handler)
+
+    def _get_basename(self) -> str:
+        path = os.path.join(self.cfg.file.root, self.cfg.file.path)
+        if not os.path.exists(path):
+            os.mkdir(path)
+        return os.path.normpath(os.path.join(path, self.cfg.file.basename))
+
+    def _get_timed_handler(self, basename: str) -> TimedRotatingFileHandler:
+        handler = TimedRotatingFileHandler(
+            basename,
+            when=self.cfg.file.when,
+            encoding='utf-8',
+            month_archiving=self.cfg.file.month
         )
-
-        # console handler
-        if cfg['console']['enable']:
-            console_level = Log.get_level(cfg['console']['level'])
-            console = logging.StreamHandler()
-            console.setLevel(console_level)
-            console.setFormatter(formatter)
-            logger.addHandler(console)
-
-        # file handler
-        if cfg['file']['enable']:
-            file_level = Log.get_level(cfg['file']['level'])
-            basename = cfg['file']['basename']
-            path = cfg['file']['path']
-            suffix = cfg['file']['suffix']
-            when = cfg['file']['when']
-            month = bool(cfg['file']['month'])
-            error_enable = cfg['file']['error_enable']
-            error_suffix = cfg['file']['error_suffix']
-
-            if not os.path.isabs(path):
-                path = os.path.join(root, path)
-            if not os.path.exists(path):
-                os.mkdir(path)
-            basename = os.path.join(
-                path,
-                basename
-            )
-
-            if error_enable:
-                rsp_handler = TimedRotatingFileHandler(
-                    basename,
-                    mode='a+',
-                    when=when,
-                    encoding='utf-8',
-                    month_archiving=month,
-                )
-                rsp_handler.suffix += suffix
-                rsp_handler.addFilter(LevelFilter(True))
-                rsp_handler.setLevel(file_level)
-                rsp_handler.setFormatter(formatter)
-                logger.addHandler(rsp_handler)
-
-                err_handler = TimedRotatingFileHandler(
-                    basename + error_suffix,
-                    mode='a+',
-                    when=when,
-                    encoding='utf-8',
-                    month_archiving=month,
-                )
-                err_handler.suffix += suffix
-                err_handler.addFilter(LevelFilter(False))
-                err_handler.setLevel(file_level)
-                err_handler.setFormatter(formatter)
-                logger.addHandler(err_handler)
-            else:
-                handler = TimedRotatingFileHandler(
-                    basename,
-                    mode='a+',
-                    when=when,
-                    encoding='utf-8',
-                    month_archiving=month,
-                )
-                handler.suffix += suffix
-                handler.setLevel(file_level)
-                handler.setFormatter(formatter)
-                logger.addHandler(handler)
-
-        Log.STATUS = Log.INITED
-
-        ...
+        handler.suffix += self.cfg.file.suffix
+        handler.setLevel(self.get_level(self.cfg.file.level))
+        handler.setFormatter(self.formatter)
+        return handler
 
 
 get_logger = Log.get_logger
-get_level = Log.get_level
-clear = Log.clear
-clear_handlers = Log.clear_handlers
-init = Log.init
+getLogger = Log.getLogger

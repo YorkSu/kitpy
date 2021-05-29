@@ -1,32 +1,28 @@
 # -*- coding: utf-8 -*-
-import typing
+from typing import Any
 
-from kitpy.abcs import Singleton
+from kitpy.singleton import Singleton
 
 
 class Flags(Singleton):
     """Global Parameters Manager
 
-    This is a Singleton Class"""
-    def __init__(self):
-        self.ROOT = ''
-        self.CONFIG_PATH = ''
-        self.CFG = dict()
-
-    def __getattribute__(self, key, default=None) -> typing.Any:
+    This is a Singleton Class
+    """
+    def __getattribute__(self, key: str, default: Any = None) -> Any:
         try:
             return super().__getattribute__(key)
         except AttributeError:
             return default
 
-    def get(self, key, default=None) -> typing.Any:
+    def get(self, key: str, default: Any = None) -> Any:
         """Get the value of an argument
 
-          If not found, return default
+        If not found, return default
         """
         return self.__getattribute__(key, default)
 
-    def set(self, key, value):
+    def set(self, key: str, value: Any) -> None:
         """Set the value of an argument"""
         self.__setattr__(key, value)
 

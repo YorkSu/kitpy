@@ -3,10 +3,6 @@ import abc
 import threading
 
 
-abstractmethod = abc.abstractmethod
-ABC = abc.ABC
-
-
 class SingletonMetaclass(type):
     """Metaclass for defining Singleton Classes
 

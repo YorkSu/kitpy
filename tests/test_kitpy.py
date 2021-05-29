@@ -1,58 +1,64 @@
 import kitpy as kp
 
-HERE = kp.paths.fd(__file__)
-ROOT = kp.paths.dir(HERE)
-CONFIG_PATH = kp.paths.join(ROOT, 'config')
-CFG = kp.config.load('config.yml', CONFIG_PATH)
-kp.log.init(CFG, ROOT)
+
+HERE = kp.path.fd(__file__)
+ROOT = kp.path.dir(HERE)
+CONFIG_PATH = kp.path.join(ROOT, 'config')
 
 
-def log(name: str, msg: str = 'OK'):
-    kp.get_logger(name).info(msg)
+def log_ok(name: str, msg: str = 'OK'):
+    Log.get_logger(name).info(msg)
 
 
 class TestKitpy:
     def test_singleton(self):
         class Foo(kp.Singleton):
             ...
-
         a = Foo()
         b = Foo()
         assert a is b
-        log('test_singleton')
 
-    def test_config_load(self):
-        source = 'config.yml'
-        filepath = kp.paths.join(CONFIG_PATH, source)
-        assert kp.config.load(filepath) != {}
-        log('test_config_load')
+    def test_flags(self):
+        f = kp.Flags()
+        assert f is kp.FLAGS
+        assert f.not_exist is None
+        assert f.get('not_exist') is None
+        assert f.get('not_exist', 1) == 1
+        f.foo = 1
+        assert f.foo == 1
+        assert f.get('foo') == 1
+        f.set('foo', 2)
+        assert f.foo == 2
 
-    def test_config_dump(self):
-        source = 'test.yml'
-        cfg = {'test': {
-            'foo': 'bar',
-            'num': 123,
-            'bool': True,
-            'fake_bool': 'true',
-        }}
-        filepath = kp.paths.join(CONFIG_PATH, source)
-        if kp.paths.exists(filepath):
-            kp.paths.remove(filepath)
-        assert kp.config.dump(cfg, filepath)
-        kp.paths.remove(filepath)
-        log('test_config_dump')
+    def test_config_json_load(self):
+        source = kp.path.join(CONFIG_PATH, 'demo.json')
+        data1 = kp.config.load(source)
+        data2 = kp.config.JsonHandler(source).load()
+        assert data1
+        assert data2
+        assert data1 == data2
 
-    def test_lazy(self):
-        time = kp.lazy.load('time')
-        assert time
-        assert time.time()
-        log('test_lazy')
+    def test_config_json_dump(self):
+        source = kp.path.join(CONFIG_PATH, 'demo.json')
+        data1 = {'test': 'abc'}
+        data2 = kp.config.load(source)
+        kp.config.dump(source, data1)
+        assert data1 == kp.config.load(source)
+        kp.config.JsonHandler(source).dump(data2)
+        assert data2 == kp.config.load(source)
 
-    def test_utils_times_count(self):
-        with kp.Count(show=False) as c:
-            s = 0
-            for i in range(2 ** 20):
-                s += i
-        assert c
-        assert c.cost
-        log('test_utils_times_count')
+    def test_convert_dict2dict(self):
+        data = {
+            'a': 1,
+            'obj': {'b': 2},
+            'li': ['abc', 'def'],
+            'objs': [{'c': 3}, {'d': 4}]
+        }
+        obj = kp.dict2ad(data)
+        print(obj)
+        assert obj.a == 1
+        assert isinstance(obj.obj, kp.convert.AdvancedDict)
+        assert obj.obj.b == 2
+        assert obj.li[0] == 'abc'
+        assert isinstance(obj.objs[0], kp.convert.AdvancedDict)
+        assert obj.objs[0].c == 3
