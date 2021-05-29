@@ -13,7 +13,7 @@ from kitpy import dev
 
 __author__ = 'York Su'
 __email__ = 'york_su@qq.com'
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 ConfigHandler = config.ConfigHandler
 JsonHandler = config.JsonHandler
@@ -48,3 +48,7 @@ now = timez.now
 sleep = timez.sleep
 strftime = timez.strftime
 unix = timez.unix
+
+
+def log_init(config_file = 'config/config.yml'):
+    Log(cfg=config.load(workspace(config_file))).init()
