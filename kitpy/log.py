@@ -7,6 +7,7 @@ import time
 from kitpy.singleton import Singleton
 from kitpy.convert import AdvancedDict
 from kitpy.convert import dict2ad
+from kitpy.project import ROOT
 
 DEFAULT_CFG = {
     'enable': True,
@@ -231,7 +232,8 @@ class Log(Singleton):
             self.root_logger.addHandler(handler)
 
     def _get_basename(self) -> str:
-        path = os.path.join(self.cfg.file.root, self.cfg.file.path)
+        root = ROOT if ROOT != './' else self.cfg.file.root
+        path = os.path.join(root, self.cfg.file.path)
         if not os.path.exists(path):
             os.mkdir(path)
         return os.path.normpath(os.path.join(path, self.cfg.file.basename))
