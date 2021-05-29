@@ -4,7 +4,7 @@
 import os
 from setuptools import setup, find_packages
 
-from kitpy import __version__
+from kitpy.__config__ import __version__
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
