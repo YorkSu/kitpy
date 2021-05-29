@@ -4,8 +4,6 @@
 import os
 from setuptools import setup, find_packages
 
-from kitpy.__config__ import __version__
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Get the long description from the README file
@@ -21,7 +19,7 @@ dependency_links = [x.strip().replace('git+', '') for x in all_reqs if x.startsw
 
 setup(
     name='kitpy',
-    version=__version__,
+    version='0.2.2',
     description='Kit of Python',
     author='York Su',
     author_email='york_su@qq.com',
