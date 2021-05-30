@@ -2,4 +2,4 @@
 """Develop Kits."""
 from kitpy.dev import lazy
 
-from kitpy.dev.lazy import LazyLoader
+LazyLoader = lazy.LazyLoader
