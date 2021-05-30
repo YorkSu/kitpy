@@ -2,6 +2,8 @@
 import os
 import sys
 
+from typing import AnyStr
+
 
 abs = os.path.abspath
 basename = os.path.basename
@@ -25,6 +27,7 @@ islink = os.path.islink
 ismount = os.path.ismount
 join = os.path.join
 listdir = os.listdir
+mkdir = os.mkdir
 normcase = os.path.normcase
 normpath = os.path.normpath
 remove = os.remove
@@ -33,24 +36,19 @@ relpath = os.path.relpath
 split = os.path.split
 
 
-def crf():
+def crf() -> AnyStr:
     return sys.argv[0]
 
 
-def cd():
+def cd() -> AnyStr:
     return os.path.dirname(sys.argv[0])
 
 
-def fd(filename):
-    return os.path.dirname(os.path.abspath(filename))
+def fd(_file: AnyStr) -> AnyStr:
+    return os.path.dirname(os.path.abspath(_file))
 
 
-def mkdir(path, mode=511, dir_fd=None):
-    if not os.path.exists(path):
-        os.mkdir(path, mode=mode, dir_fd=dir_fd)
-
-
-def fix(path: str, filename: str) -> str:
+def fix(path: AnyStr, filename: AnyStr) -> AnyStr:
     if isabs(filename):
         return filename
     return join(path, filename)
