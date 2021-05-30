@@ -2,7 +2,7 @@
 import os
 import sys
 
-from typing import AnyStr
+from typing import AnyStr, Sequence, Union
 
 
 abs = os.path.abspath
@@ -27,6 +27,7 @@ islink = os.path.islink
 ismount = os.path.ismount
 join = os.path.join
 listdir = os.listdir
+makedirs = os.makedirs
 mkdir = os.mkdir
 normcase = os.path.normcase
 normpath = os.path.normpath
@@ -80,3 +81,13 @@ def userhome(username=None) -> AnyStr:
             # unix os
             result = ''
     return result
+
+
+def ensure(path: Union[AnyStr, Sequence[AnyStr]], mode: int = 0o777) -> AnyStr:
+    if isinstance(path, (tuple, list)):
+        path = join(path)
+
+    if not exists(path):
+        os.makedirs(normpath(path), mode=mode, exist_ok=True)
+
+    return path
