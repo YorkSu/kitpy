@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import shutil
 
 from typing import AnyStr, Sequence, Union
 
@@ -88,6 +89,19 @@ def ensure(path: Union[AnyStr, Sequence[AnyStr]], mode: int = 0o777) -> AnyStr:
         path = join(path)
 
     if not exists(path):
+        os.makedirs(normpath(path), mode=mode, exist_ok=True)
+
+    return path
+
+
+def ensure_empty(path: Union[AnyStr, Sequence[AnyStr]], mode: int = 0o777) -> AnyStr:
+    if isinstance(path, (tuple, list)):
+        path = join(path)
+
+    if exists(path):
+        if os.listdir(path):
+            shutil.rmtree(path)
+    else:
         os.makedirs(normpath(path), mode=mode, exist_ok=True)
 
     return path
