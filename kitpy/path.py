@@ -52,3 +52,31 @@ def fix(path: AnyStr, filename: AnyStr) -> AnyStr:
     if isabs(filename):
         return filename
     return join(path, filename)
+
+
+def userhome(username=None) -> AnyStr:
+    if username is None:
+        if 'HOME' in os.environ:
+            result = os.environ['HOME']
+        else:
+            if sys.platform.startswith('win32'):
+                if 'USERPROFILE' in os.environ:
+                    result = os.environ['USERPROFILE']
+                elif 'HOMEPATH' in os.environ:
+                    drive = os.environ.get('HOMEDRIVE', '')
+                    result = join(drive, os.environ['HOMEPATH'])
+                else:
+                    raise OSError("Cannot determine the user's home directory")
+            else:
+                # unix os
+                result = ''
+    else:
+        if sys.platform.startswith('win32'):
+            c_users = dirname(userhome())
+            userhome_dpath = join(c_users, username)
+            if not exists(userhome_dpath):
+                raise KeyError(f'Unknown user: {username}')
+        else:
+            # unix os
+            result = ''
+    return result
