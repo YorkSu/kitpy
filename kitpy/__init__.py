@@ -13,7 +13,7 @@ from kitpy import dev
 
 __author__ = 'York Su'
 __email__ = 'york_su@qq.com'
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 ConfigHandler = config.ConfigHandler
 JsonHandler = config.JsonHandler

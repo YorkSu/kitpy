@@ -19,7 +19,7 @@ dependency_links = [x.strip().replace('git+', '') for x in all_reqs if x.startsw
 
 setup(
     name='kitpy',
-    version='0.2.4',
+    version='0.2.5',
     description='Kit of Python',
     author='York Su',
     author_email='york_su@qq.com',
@@ -45,4 +45,5 @@ setup(
     ],
     license="MIT license",
 )
+
 
