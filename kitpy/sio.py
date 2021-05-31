@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """String File IO"""
 import os
-from typing import AnyStr, Iterable, Sequence, Union, NoReturn
+from typing import AnyStr, Iterable, Sequence, Union
 
 from kitpy.path import delete
 
@@ -23,7 +23,7 @@ def read(path: AnyStr, encoding='utf-8') -> Sequence[str]:
         return f.readlines()
 
 
-def touch(path, mode=0o666, dir_fd=None, **kwargs) -> None:
+def touch(path: AnyStr, mode=0o666, dir_fd=None, **kwargs) -> None:
     flags = os.O_CREAT | os.O_APPEND
     with os.fdopen(os.open(path, flags=flags,
                            mode=mode, dir_fd=dir_fd)) as f:
