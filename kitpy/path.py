@@ -45,6 +45,20 @@ def cd() -> AnyStr:
     return os.path.dirname(sys.argv[0])
 
 
+def delete(path: AnyStr, must_exist=False) -> NoReturn:
+    if os.path.exists(path):
+        if os.path.islink(path):
+            os.unlink(path)
+        elif os.path.isfile(path):
+            os.unlink(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            raise Exception('Unknown Error', path)
+    elif must_exist:
+        raise FileNotFoundError(path)
+
+
 def ensure(path: Union[AnyStr, Sequence[AnyStr]], mode: int = 0o777) -> AnyStr:
     if isinstance(path, (tuple, list)):
         path = join(path)
