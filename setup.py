@@ -45,5 +45,3 @@ setup(
     ],
     license="MIT license",
 )
-
-
