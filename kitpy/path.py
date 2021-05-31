@@ -2,8 +2,7 @@
 import os
 import sys
 import shutil
-
-from typing import AnyStr, Sequence, Union
+from typing import AnyStr, Sequence, Union, NoReturn
 
 
 abs = os.path.abspath
@@ -46,6 +45,29 @@ def cd() -> AnyStr:
     return os.path.dirname(sys.argv[0])
 
 
+def ensure(path: Union[AnyStr, Sequence[AnyStr]], mode: int = 0o777) -> AnyStr:
+    if isinstance(path, (tuple, list)):
+        path = join(path)
+
+    if not exists(path):
+        os.makedirs(normpath(path), mode=mode, exist_ok=True)
+
+    return path
+
+
+def ensure_empty(path: Union[AnyStr, Sequence[AnyStr]], mode: int = 0o777) -> AnyStr:
+    if isinstance(path, (tuple, list)):
+        path = join(path)
+
+    if exists(path):
+        if os.listdir(path):
+            delete(path)
+    else:
+        os.makedirs(normpath(path), mode=mode, exist_ok=True)
+
+    return path
+
+
 def fd(_file: AnyStr) -> AnyStr:
     return os.path.dirname(os.path.abspath(_file))
 
@@ -82,26 +104,3 @@ def userhome(username=None) -> AnyStr:
             # unix os
             result = ''
     return result
-
-
-def ensure(path: Union[AnyStr, Sequence[AnyStr]], mode: int = 0o777) -> AnyStr:
-    if isinstance(path, (tuple, list)):
-        path = join(path)
-
-    if not exists(path):
-        os.makedirs(normpath(path), mode=mode, exist_ok=True)
-
-    return path
-
-
-def ensure_empty(path: Union[AnyStr, Sequence[AnyStr]], mode: int = 0o777) -> AnyStr:
-    if isinstance(path, (tuple, list)):
-        path = join(path)
-
-    if exists(path):
-        if os.listdir(path):
-            shutil.rmtree(path)
-    else:
-        os.makedirs(normpath(path), mode=mode, exist_ok=True)
-
-    return path
