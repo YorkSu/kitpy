@@ -37,12 +37,12 @@ relpath = os.path.relpath
 split = os.path.split
 
 
-def crf() -> AnyStr:
-    return sys.argv[0]
-
-
 def cd() -> AnyStr:
     return os.path.dirname(sys.argv[0])
+
+
+def crf() -> AnyStr:
+    return sys.argv[0]
 
 
 def delete(path: AnyStr, must_exist=False) -> NoReturn:
