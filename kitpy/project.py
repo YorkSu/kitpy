@@ -28,7 +28,7 @@ class Project(Singleton):
 
     def workspace(self, name: AnyStr) -> AnyStr:
         """
-        Returns relative path that based on work space
+        Returns relative path that based on work space.
 
         Args:
             name (AnyStr): the relative path
@@ -39,6 +39,12 @@ class Project(Singleton):
         return path.normpath(path.join(self._root, name))
 
     def set_root(self, root: AnyStr) -> None:
+        """
+        Set root of the work space.
+
+        Args:
+            root (AnyStr): the root path
+        """
         self._root = root
 
     def set_root_file(self, _file: AnyStr, extra='') -> None:
