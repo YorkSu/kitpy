@@ -73,6 +73,16 @@ def delete(path: AnyStr, must_exist=False) -> NoReturn:
 
 
 def ensure(path: Union[AnyStr, Sequence[AnyStr]], mode: int = 0o777) -> AnyStr:
+    """
+    Ensure that directory will exist.
+
+    Args:
+        path (Union[AnyStr, Sequence[AnyStr]]): dir to ensure
+        mode (int): octal mode of directory
+
+    Returns:
+        AnyStr: the ensure directory
+    """
     if isinstance(path, (tuple, list)):
         path = join(path)
 
