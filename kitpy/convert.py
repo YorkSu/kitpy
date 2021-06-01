@@ -3,6 +3,10 @@ from typing import Optional
 
 
 class AdvancedDict(dict):
+    """
+    The superset of ``dict``.
+    You can access the key values of a dict just like the members of class
+    """
     def __getattr__(self, key):
         return self.get(key)
 
@@ -14,6 +18,15 @@ class AdvancedDict(dict):
 
     @classmethod
     def from_dict(cls, _dict: dict) -> Optional['AdvancedDict']:
+        """
+        Return AdvancedDict from a ``dict``.
+
+        Args:
+            _dict (dict): the origin dict
+
+        Returns:
+            AdvancedDict: the advanced dict
+        """
         if isinstance(_dict, dict):
             obj = cls()
             for k, v in _dict.items():
