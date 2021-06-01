@@ -46,6 +46,19 @@ def crf() -> AnyStr:
 
 
 def delete(path: AnyStr, must_exist=False) -> NoReturn:
+    """
+    Removes a file or recursively removes a directory.
+    If a path does not exist, raise Exception or do nothing.
+
+    Args:
+        path (AnyStr): the file path
+        must_exist (bool): if True and path does not exist,
+            raise Exception
+
+    Raises:
+        FileNotFoundError: path not exist and ``must_exist`` is True
+        Exception: Unknown Error
+    """
     if os.path.exists(path):
         if os.path.islink(path):
             os.unlink(path)
