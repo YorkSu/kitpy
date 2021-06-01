@@ -47,7 +47,14 @@ class Project(Singleton):
         """
         self._root = root
 
-    def set_root_file(self, _file: AnyStr, extra='') -> None:
+    def set_root_file(self, _file: AnyStr, extra: str = '') -> None:
+        """
+        Set root of the work space from ``__file__``.
+
+        Args:
+            _file (AnyStr): file path, ``__file__`` is recommended
+            extra (str): the extra path
+        """
         self._root = path.join(path.fd(_file), extra)
 
     def set_config(self, config: AnyStr) -> None:
