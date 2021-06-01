@@ -9,6 +9,7 @@ config/
 logs/
 trash/
 dev/
+docs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
