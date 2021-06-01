@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import AnyStr
+
 from kitpy.singleton import Singleton
 from kitpy import path
 
@@ -24,7 +26,16 @@ class Project(Singleton):
     def data(self) -> str:
         return path.normpath(path.join(self._root, self._data))
 
-    def workspace(self, name: str) -> str:
+    def workspace(self, name: AnyStr) -> AnyStr:
+        """
+        Returns relative path that based on work space
+
+        Args:
+            name (AnyStr): the relative path
+
+        Returns:
+            AnyStr: the final path
+        """
         return path.normpath(path.join(self._root, name))
 
     def set_root(self, root: str) -> None:
