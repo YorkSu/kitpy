@@ -67,6 +67,12 @@ class Project(Singleton):
         self._config = config
 
     def set_data(self, data: AnyStr) -> None:
+        """
+        Set data path of the work space
+
+        Args:
+            data (AnyStr): the data path
+        """
         self._data = data
 
 
