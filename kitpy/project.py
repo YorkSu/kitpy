@@ -58,6 +58,12 @@ class Project(Singleton):
         self._root = path.join(path.fd(_file), extra)
 
     def set_config(self, config: AnyStr) -> None:
+        """
+        Set config path of the work space
+
+        Args:
+            config (AnyStr): the config path
+        """
         self._config = config
 
     def set_data(self, data: AnyStr) -> None:
