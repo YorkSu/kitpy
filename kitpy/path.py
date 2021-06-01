@@ -125,7 +125,25 @@ def fix(path: AnyStr, filename: AnyStr) -> AnyStr:
     return join(path, filename)
 
 
-def userhome(username=None) -> AnyStr:
+def userhome(username: str = None) -> AnyStr:
+    """
+    Returns the path to some user's home directory.
+
+    Args:
+        username (Optional[str]): name of a user on the system.
+            If not specified, the current user is inferred.
+
+    Returns:
+        AnyStr: path to the specified home directory
+
+    Raises:
+        KeyError: if the specified user does not exist on the system
+        OSError: if username is unspecified and the current user cannot
+            be inferred
+
+    Notes:
+        Unix systems are not supported temporarily
+    """
     if username is None:
         if 'HOME' in os.environ:
             result = os.environ['HOME']
