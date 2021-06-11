@@ -70,7 +70,7 @@ class Singleton(metaclass=SingletonMetaclass):
 
     Inherit this class to Create a Singleton Class.
 
-    SubClasses SHALL NOTE `This is a Singleton Class`.
+    SubClasses SHALL NOTE ``This is a Singleton Class``.
 
     """
     _lock = threading.RLock()
