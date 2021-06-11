@@ -71,5 +71,4 @@ def decode(s: str, clss: Union[Sequence[Serializable], Serializable] = None) -> 
         return json.loads(s, object_hook=AdvancedDecoder(clss))
     if issubclass(clss, Serializable):
         return json.loads(s, object_hook=AdvancedDecoder([clss]))
-    raise TypeError('Expect clss `[Serializable]` or None, got',
-                    type(clss))
+    raise TypeError('Expect clss `[Serializable]` or None, got', type(clss))
